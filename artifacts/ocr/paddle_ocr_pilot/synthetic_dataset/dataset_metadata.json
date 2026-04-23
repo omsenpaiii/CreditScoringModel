@@ -1,0 +1,5 @@
+{
+  "train_count": 40,
+  "val_count": 10,
+  "note": "Synthetic OCR snippets used only for a preliminary PaddleOCR fine-tuning pilot."
+}

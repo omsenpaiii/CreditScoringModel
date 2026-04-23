@@ -1,0 +1,8 @@
+{
+  "workspace_root": "/Users/macbook/Downloads/Credit Scoring Model",
+  "python_executable": "/Users/macbook/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+  "output_dir": "artifacts/ocr/paddle_ocr_pilot",
+  "train_count": 40,
+  "val_count": 10,
+  "seed": 42
+}

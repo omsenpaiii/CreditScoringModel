@@ -1,0 +1,14 @@
+{
+  "dataset": "lending_club_sample",
+  "source_path": "data/raw/lending_club_sample.csv",
+  "records": 4000,
+  "target_name": "default_like_outcome",
+  "positive_label": 1,
+  "notes": "Public cleaned Lending Club CSV mirrored on GitHub. Pilot run may use a stratified subset for feasibility.",
+  "class_counts": {
+    "0": 3268,
+    "1": 732
+  },
+  "positive_rate": 0.183,
+  "sample_size": 4000
+}

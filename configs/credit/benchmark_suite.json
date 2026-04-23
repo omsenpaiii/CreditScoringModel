@@ -1,0 +1,77 @@
+{
+  "defaults": {
+    "raw_data_dir": "data/raw",
+    "split_seed": 42
+  },
+  "summary_output": "artifacts/credit/benchmark_summary.csv",
+  "runs": [
+    {
+      "run_id": "german_logreg_class_weight",
+      "dataset": "german_credit",
+      "model": "logistic_regression",
+      "imbalance_strategy": "class_weight",
+      "preprocessing_variant": "numeric_scale_ohe",
+      "output_dir": "artifacts/credit/german_logreg_class_weight"
+    },
+    {
+      "run_id": "german_rf_oversample",
+      "dataset": "german_credit",
+      "model": "random_forest",
+      "imbalance_strategy": "oversample",
+      "preprocessing_variant": "median_mode_ohe",
+      "output_dir": "artifacts/credit/german_rf_oversample"
+    },
+    {
+      "run_id": "german_gb_none",
+      "dataset": "german_credit",
+      "model": "gradient_boosting",
+      "imbalance_strategy": "none",
+      "preprocessing_variant": "median_mode_ohe",
+      "output_dir": "artifacts/credit/german_gb_none"
+    },
+    {
+      "run_id": "german_mlp_oversample",
+      "dataset": "german_credit",
+      "model": "mlp",
+      "imbalance_strategy": "oversample",
+      "preprocessing_variant": "numeric_scale_ohe",
+      "output_dir": "artifacts/credit/german_mlp_oversample"
+    },
+    {
+      "run_id": "lending_logreg_class_weight",
+      "dataset": "lending_club_sample",
+      "model": "logistic_regression",
+      "imbalance_strategy": "class_weight",
+      "preprocessing_variant": "numeric_scale_ohe",
+      "sample_size": 4000,
+      "output_dir": "artifacts/credit/lending_logreg_class_weight"
+    },
+    {
+      "run_id": "lending_rf_oversample",
+      "dataset": "lending_club_sample",
+      "model": "random_forest",
+      "imbalance_strategy": "oversample",
+      "preprocessing_variant": "median_mode_ohe",
+      "sample_size": 4000,
+      "output_dir": "artifacts/credit/lending_rf_oversample"
+    },
+    {
+      "run_id": "lending_gb_none",
+      "dataset": "lending_club_sample",
+      "model": "gradient_boosting",
+      "imbalance_strategy": "none",
+      "preprocessing_variant": "median_mode_ohe",
+      "sample_size": 4000,
+      "output_dir": "artifacts/credit/lending_gb_none"
+    },
+    {
+      "run_id": "lending_mlp_oversample",
+      "dataset": "lending_club_sample",
+      "model": "mlp",
+      "imbalance_strategy": "oversample",
+      "preprocessing_variant": "numeric_scale_ohe",
+      "sample_size": 4000,
+      "output_dir": "artifacts/credit/lending_mlp_oversample"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+.deps/
+__pycache__/
+*.pyc
+
+# Ignore nested git metadata for vendored repositories, but keep their files
+third_party/**/.git/

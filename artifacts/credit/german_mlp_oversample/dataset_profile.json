@@ -1,0 +1,14 @@
+{
+  "dataset": "german_credit",
+  "source_path": "data/raw/german_credit.data",
+  "records": 1000,
+  "target_name": "bad_credit_risk",
+  "positive_label": 1,
+  "notes": "Positive class represents bad credit risk (original target value 2).",
+  "class_counts": {
+    "0": 700,
+    "1": 300
+  },
+  "positive_rate": 0.3,
+  "sample_size": null
+}
