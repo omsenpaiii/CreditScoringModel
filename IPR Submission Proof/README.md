@@ -20,5 +20,9 @@ Add the following files after completing the official copyright submission:
 - Copyright application form or acknowledgement PDF.
 - Screenshot of successful submission.
 - Any receipt/reference number document issued by the portal.
+- Source-code PDF containing team-authored modules.
+- Project report PDF and final presentation export, if requested by the evaluator.
+
+Supporting copyright package notes are available at `Source code/docs/COPYRIGHT_PACKAGE.md`.
 
 No official submission proof has been fabricated in this repository.

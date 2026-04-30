@@ -5,3 +5,8 @@ matplotlib
 python-docx
 python-pptx
 Pillow
+datasets
+paddleocr
+paddlepaddle
+pyarrow
+PyYAML

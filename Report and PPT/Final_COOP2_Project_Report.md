@@ -18,7 +18,7 @@ Prepared for CO-OP Project at Industry (Module-2)
 
 ## Abstract
 
-This project presents an AI-powered loan-risk assessment workflow that combines tabular credit scoring with a document OCR extension. The credit-scoring module benchmarks Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models on German Credit and Lending Club sample data. The OCR module demonstrates how a PaddleOCR-based pipeline can support borrower-document intake through a clear document-processing workflow.
+This project presents an AI-powered loan-risk assessment workflow that combines tabular credit scoring with a real-data document OCR extension. The credit-scoring module benchmarks Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models on German Credit and Lending Club sample data. The OCR module prepares ICDAR2019 SROIE and FUNSD scanned-document annotations for PaddleOCR evaluation and fine-tuning.
 
 ## Best Credit-Scoring Results
 
@@ -28,8 +28,15 @@ This project presents an AI-powered loan-risk assessment workflow that combines 
 ## OCR Module Implementation
 
 - PaddleOCR workflow: document upload, preprocessing, recognition, field extraction, and review queue.
-- Current OCR status: implementation workflow prepared and ready for evaluation on real scanned borrower documents.
-- Evaluation method: compare OCR field outputs against manually verified ground-truth labels once real document samples are available.
+- Real OCR data basis: ICDAR2019 SROIE scanned receipts and FUNSD noisy scanned forms.
+- Current OCR status: Real SROIE/FUNSD OCR pipeline status: prepared_real_dataset. Prepared recognition crops: train: 1200, val: 300, test: 300.
+- Evaluation method: compare OCR outputs against held-out public scanned-document labels, then repeat on private borrower documents after privacy review and annotation.
+
+## Copyright Appendix
+
+- Original work claimed: source code, configurations, report text, diagrams, integration workflow, generated figures, and final submission packaging.
+- Third-party work not claimed: PaddleOCR/PaddlePaddle, public datasets, pretrained weights, and external Python libraries.
+- Form XIV support notes are documented in `Source code/docs/COPYRIGHT_PACKAGE.md`.
 
 ## Evaluation Readiness
 

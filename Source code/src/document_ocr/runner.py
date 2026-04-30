@@ -11,11 +11,15 @@ from .paddle_workflow import (
     summarize_ocr_run,
     write_tiny_rec_config,
 )
+from .real_pipeline import run_real_ocr_experiment
 from .synthetic_data import generate_synthetic_ocr_dataset
 
 
 def run_ocr_experiment(config_path: str | Path) -> dict[str, Any]:
     config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    if config.get("pipeline") == "real_ocr_finetune":
+        return run_real_ocr_experiment(config_path)
+
     output_dir = Path(config["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)
 

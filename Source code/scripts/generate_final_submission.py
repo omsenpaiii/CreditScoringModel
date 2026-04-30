@@ -6,6 +6,7 @@ import shutil
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import matplotlib.pyplot as plt
 from docx import Document
@@ -36,6 +37,7 @@ REPORT_DIR = REPO_ROOT / "Report and PPT"
 TEMPLATE_DIR = REPORT_DIR / "Templates"
 FIGURE_DIR = REPORT_DIR / "figures"
 SUMMARY_CSV = SOURCE_ROOT / "artifacts/credit/benchmark_summary.csv"
+OCR_REAL_SUMMARY = SOURCE_ROOT / "artifacts/ocr/real_ocr_finetune/ocr_run_summary.json"
 
 DOCX_TEMPLATE = TEMPLATE_DIR / "COOP2_Project_Report_Format_Template.docx"
 PPTX_TEMPLATE = TEMPLATE_DIR / "COOP2_External_PPT_Template.pptx"
@@ -57,6 +59,43 @@ EVALUATION_READINESS = [
     ("Revision and Documentation", "Final report, PPT, README, figures, templates, and reproducible generator are included."),
     ("Supervisor Meetings", "Progress updates and feedback handling are documented as part of the final package."),
 ]
+
+
+def load_real_ocr_summary() -> dict[str, Any] | None:
+    if not OCR_REAL_SUMMARY.exists():
+        return None
+    try:
+        return json.loads(OCR_REAL_SUMMARY.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+
+
+def real_ocr_status_text(summary: dict[str, Any] | None) -> str:
+    if not summary:
+        return "Real SROIE/FUNSD OCR pipeline implemented; run configs/ocr/real_ocr_finetune.json to generate measured OCR artifacts."
+    dataset_info = summary.get("dataset_info", {})
+    counts = dataset_info.get("counts", {})
+    count_text = ", ".join(f"{key}: {value}" for key, value in counts.items() if value)
+    status = str(summary.get("status", "prepared"))
+    return f"Real SROIE/FUNSD OCR pipeline status: {status}. Prepared recognition crops: {count_text or 'see manifest'}."
+
+
+def real_ocr_metric_rows(summary: dict[str, Any] | None) -> list[list[str]]:
+    if not summary:
+        return []
+    baseline = summary.get("baseline", {})
+    if baseline.get("status") != "completed":
+        return []
+    metrics = baseline.get("metrics", {})
+    return [
+        [
+            "Pretrained PaddleOCR baseline",
+            str(metrics.get("sample_count", "0")),
+            f"{float(metrics.get('character_error_rate', 0.0)):.3f}",
+            f"{float(metrics.get('word_accuracy', 0.0)):.3f}",
+            f"{float(metrics.get('exact_match_accuracy', 0.0)):.3f}",
+        ]
+    ]
 
 
 def ensure_dirs() -> None:
@@ -193,7 +232,7 @@ def make_ocr_workflow(output_path: Path) -> None:
     ax.text(
         0.5,
         0.22,
-        "Evaluation plan: compare OCR outputs with manually verified document fields once real scanned borrower documents are available.",
+        "Real-data basis: SROIE receipts and FUNSD scanned forms feed measured PaddleOCR evaluation before borrower-document deployment.",
         ha="center",
         va="center",
         fontsize=10.5,
@@ -228,6 +267,7 @@ def prepare_figures(rows: list[dict[str, str]]) -> dict[str, Path]:
 
 def build_markdown(rows: list[dict[str, str]]) -> str:
     best = best_runs_by_dataset(rows)
+    ocr_summary = load_real_ocr_summary()
     team_lines = "\n".join([f"- {name} ({roll})" for name, roll in TEAM])
     result_lines = "\n".join(
         [
@@ -254,7 +294,7 @@ Prepared for CO-OP Project at Industry (Module-2)
 
 ## Abstract
 
-This project presents an AI-powered loan-risk assessment workflow that combines tabular credit scoring with a document OCR extension. The credit-scoring module benchmarks Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models on German Credit and Lending Club sample data. The OCR module demonstrates how a PaddleOCR-based pipeline can support borrower-document intake through a clear document-processing workflow.
+This project presents an AI-powered loan-risk assessment workflow that combines tabular credit scoring with a real-data document OCR extension. The credit-scoring module benchmarks Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models on German Credit and Lending Club sample data. The OCR module prepares ICDAR2019 SROIE and FUNSD scanned-document annotations for PaddleOCR evaluation and fine-tuning.
 
 ## Best Credit-Scoring Results
 
@@ -263,8 +303,15 @@ This project presents an AI-powered loan-risk assessment workflow that combines 
 ## OCR Module Implementation
 
 - PaddleOCR workflow: document upload, preprocessing, recognition, field extraction, and review queue.
-- Current OCR status: implementation workflow prepared and ready for evaluation on real scanned borrower documents.
-- Evaluation method: compare OCR field outputs against manually verified ground-truth labels once real document samples are available.
+- Real OCR data basis: ICDAR2019 SROIE scanned receipts and FUNSD noisy scanned forms.
+- Current OCR status: {real_ocr_status_text(ocr_summary)}
+- Evaluation method: compare OCR outputs against held-out public scanned-document labels, then repeat on private borrower documents after privacy review and annotation.
+
+## Copyright Appendix
+
+- Original work claimed: source code, configurations, report text, diagrams, integration workflow, generated figures, and final submission packaging.
+- Third-party work not claimed: PaddleOCR/PaddlePaddle, public datasets, pretrained weights, and external Python libraries.
+- Form XIV support notes are documented in `Source code/docs/COPYRIGHT_PACKAGE.md`.
 
 ## Evaluation Readiness
 
@@ -349,6 +396,8 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     clear_document(document)
     set_doc_defaults(document)
     best = best_runs_by_dataset(rows)
+    ocr_summary = load_real_ocr_summary()
+    ocr_metric_rows = real_ocr_metric_rows(ocr_summary)
 
     add_centered(document, "PROJECT REPORT", 18, True)
     add_centered(document, "OF", 13, True)
@@ -404,11 +453,11 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_heading(document, "ABSTRACT")
     add_body_paragraph(
         document,
-        "Loan-risk assessment requires reliable analysis of applicant profile data as well as supporting documents submitted during onboarding. This project implements an AI-powered credit scoring and document OCR system for loan risk assessment. The credit-scoring component benchmarks machine learning and neural network models on German Credit and Lending Club sample data. The document-intelligence component uses a PaddleOCR-oriented workflow to demonstrate how loan documents can be prepared for automated field extraction.",
+        "Loan-risk assessment requires reliable analysis of applicant profile data as well as supporting documents submitted during onboarding. This project implements an AI-powered credit scoring and document OCR system for loan risk assessment. The credit-scoring component benchmarks machine learning and neural network models on German Credit and Lending Club sample data. The document-intelligence component adds a real-data PaddleOCR preparation and evaluation pipeline using public scanned-document datasets before borrower-document deployment.",
     )
     add_body_paragraph(
         document,
-        "The implemented benchmark compares Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models using ROC-AUC, PR-AUC, recall, F1-score, accuracy, confusion matrices, and feature-importance outputs. The best German Credit pilot achieved ROC-AUC 0.831, while the best Lending Club sample pilot achieved ROC-AUC 0.722. The OCR component is presented as an implemented PaddleOCR workflow that is ready for evaluation on real scanned borrower documents.",
+        "The implemented benchmark compares Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models using ROC-AUC, PR-AUC, recall, F1-score, accuracy, confusion matrices, and feature-importance outputs. The best German Credit pilot achieved ROC-AUC 0.831, while the best Lending Club sample pilot achieved ROC-AUC 0.722. The OCR component prepares ICDAR2019 SROIE and FUNSD scanned documents in PaddleOCR format and reports OCR metrics only from saved evaluation artifacts.",
     )
 
     add_heading(document, "1. INTRODUCTION")
@@ -443,7 +492,8 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
         [
             ["German Credit", "Credit-risk benchmark", "Public UCI dataset with binary risk labels."],
             ["Lending Club Sample", "Credit-risk benchmark", "Public sample used for manageable evaluation."],
-            ["Borrower Documents", "Document-intake workflow", "PaddleOCR pipeline prepared for scanned loan forms and manually verified field labels."],
+            ["ICDAR2019 SROIE", "Real OCR preparation/evaluation", "Scanned receipts with words, bounding boxes, and fields such as company, date, address, and total."],
+            ["FUNSD", "Real OCR preparation/evaluation", "Noisy scanned forms with word-level annotations for document understanding."],
         ],
     )
 
@@ -455,7 +505,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             ["Programming", "Python 3, modular package structure"],
             ["Machine Learning", "scikit-learn, pandas, NumPy"],
             ["Visualization", "matplotlib, saved ROC/PR/confusion/importance plots"],
-            ["OCR", "PaddleOCR workflow, preprocessing, recognition, and field-extraction design"],
+            ["OCR", "PaddleOCR, SROIE/FUNSD conversion, recognition evaluation, and field-extraction design"],
             ["Documentation", "python-docx, python-pptx, Markdown, GitHub"],
         ],
     )
@@ -463,7 +513,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_heading(document, "4. IMPLEMENTATION")
     add_body_paragraph(
         document,
-        "The source code is organized into credit-scoring and document-OCR modules. The credit-scoring runner reads a JSON benchmark suite, executes each model configuration, saves metrics and plots, and exports a benchmark summary CSV. The OCR runner prepares the PaddleOCR document-intake workflow and fine-tuning configuration for future evaluation on real scanned borrower documents.",
+        "The source code is organized into credit-scoring and document-OCR modules. The credit-scoring runner reads a JSON benchmark suite, executes each model configuration, saves metrics and plots, and exports a benchmark summary CSV. The OCR runner converts real SROIE/FUNSD scanned-document annotations into PaddleOCR recognition labels, runs baseline evaluation when PaddleOCR is installed, and can generate a CPU-friendly fine-tuning configuration.",
     )
     add_table(
         document,
@@ -473,7 +523,9 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             ["credit_scoring.preprocessing", "Imputation, encoding, scaling, and oversampling utilities."],
             ["credit_scoring.models", "Model factory for LR, RF, GB, and MLP configurations."],
             ["credit_scoring.evaluation", "Metrics, curves, confusion matrix, and feature importance."],
-            ["document_ocr", "PaddleOCR workflow orchestration for document recognition and field extraction."],
+            ["document_ocr.real_data", "SROIE/FUNSD ingestion, text-region cropping, PaddleOCR label generation, and manifest export."],
+            ["document_ocr.evaluation", "CER, word accuracy, exact-match accuracy, and PaddleOCR prediction sample export."],
+            ["document_ocr.real_pipeline", "Real-data OCR experiment orchestration for baseline evaluation and optional fine-tuning."],
         ],
     )
 
@@ -511,9 +563,26 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
         ["Workflow Stage", "Implementation Purpose"],
         [[title, description] for title, description in OCR_WORKFLOW_STEPS],
     )
+    add_body_paragraph(document, real_ocr_status_text(ocr_summary))
+    if ocr_metric_rows:
+        add_table(
+            document,
+            ["Evaluation Run", "Samples", "CER", "Word Accuracy", "Exact Match"],
+            ocr_metric_rows,
+        )
+    else:
+        add_table(
+            document,
+            ["OCR Evidence Item", "Status"],
+            [
+                ["Real-data converter", "Implemented for ICDAR2019 SROIE and FUNSD."],
+                ["Baseline evaluation", "Run `configs/ocr/real_ocr_finetune.json` to create measured PaddleOCR metrics."],
+                ["Fine-tuning", "CPU-friendly PaddleOCR config generated when training is enabled."],
+            ],
+        )
     add_body_paragraph(
         document,
-        "The OCR module is included as an implementation-ready document-intake workflow. Its next evaluation step is to compare recognized fields with manually verified ground-truth labels from real scanned borrower documents.",
+        "The OCR module is included as a real-data document-intake workflow. Public scanned-document datasets provide the first measured OCR evidence layer; borrower-document deployment should follow only after privacy review, annotation, and held-out validation.",
     )
 
     add_heading(document, "5.2 Final Evaluation Readiness", level=2)
@@ -550,6 +619,8 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
         "UCI Machine Learning Repository: Statlog German Credit Data.",
         "Lending Club public loan data sample used for educational model benchmarking.",
         "PaddleOCR: PaddlePaddle OCR toolkit and pretrained recognition models.",
+        "ICDAR2019 SROIE: Scanned Receipts OCR and Information Extraction dataset.",
+        "FUNSD: Form Understanding in Noisy Scanned Documents dataset.",
         "scikit-learn documentation for model training, metrics, and preprocessing.",
         "Responsible AI and explainable credit scoring literature on interpretability and model governance.",
     ]
@@ -565,6 +636,18 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             ["Report and PPT", "Final report, presentation, templates, and generated figures."],
             ["Source code", "Runnable Python code, configs, tests, data samples, and artifacts."],
             ["README.md", "Team details, status, run commands, and evaluation instructions."],
+        ],
+    )
+    add_heading(document, "APPENDIX B: COPYRIGHT AND FORM XIV SUPPORT")
+    add_table(
+        document,
+        ["Item", "Prepared Detail"],
+        [
+            ["Project title", PROJECT_TITLE],
+            ["Project type", PROJECT_TYPE],
+            ["Original material claimed", "Team-authored source code, configuration, report, presentation, diagrams, workflow, and documentation."],
+            ["Third-party material excluded", "PaddleOCR/PaddlePaddle, public datasets, external libraries, and pretrained weights."],
+            ["Filing proof", "Official application acknowledgement and screenshot must be added after actual filing."],
         ],
     )
 
@@ -651,6 +734,8 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     prs.slide_width = PptInches(13.333)
     prs.slide_height = PptInches(7.5)
     best = best_runs_by_dataset(rows)
+    ocr_summary = load_real_ocr_summary()
+    ocr_metric_rows = real_ocr_metric_rows(ocr_summary)
     german = best["german_credit"]
     lending = best["lending_club_sample"]
 
@@ -690,7 +775,7 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             "Build a reproducible credit-scoring benchmark on public datasets.",
             "Compare Logistic Regression, Random Forest, Gradient Boosting, and MLP.",
             "Save traceable metrics, plots, confusion matrices, and feature importance.",
-            "Implement PaddleOCR workflow for borrower-document intake and field extraction.",
+            "Prepare real SROIE/FUNSD scanned-document data for PaddleOCR evaluation and fine-tuning.",
             "Package the repository according to final evaluation instructions.",
         ],
         0.9,
@@ -703,7 +788,7 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     slide = add_blank_slide(prs)
     add_slide_title(slide, "System Architecture")
     add_picture_fit(slide, figures["methodology"], 0.75, 1.5, 11.9)
-    add_textbox(slide, "Credit scoring is the core decision pipeline. OCR is the document-intake extension for borrower forms.", 1.0, 6.35, 11.3, 0.45, 14, False, "566573")
+    add_textbox(slide, "Credit scoring is the core decision pipeline. OCR is the real-data document-intake extension for borrower forms.", 1.0, 6.35, 11.3, 0.45, 14, False, "566573")
 
     slide = add_blank_slide(prs)
     add_slide_title(slide, "Credit-Scoring Experiment Design")
@@ -731,21 +816,44 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_picture_fit(slide, figures.get("lending_club_sample_roc_curve.png", Path()), 7.2, 4.05, 5.1)
 
     slide = add_blank_slide(prs)
-    add_slide_title(slide, "PaddleOCR Workflow Overview", "Document-intake design for scanned borrower forms.")
+    add_slide_title(slide, "Real PaddleOCR Data Pipeline", "SROIE receipts + FUNSD forms converted into PaddleOCR recognition labels.")
     add_picture_fit(slide, figures["ocr"], 0.8, 1.45, 6.6)
     add_bullets(
         slide,
         [
-            "Pipeline covers upload, preprocessing, OCR recognition, field extraction, and review queue.",
-            "Designed to connect document intake with credit-risk assessment.",
-            "Ready for evaluation once real scanned borrower documents and verified labels are available.",
+            "Real scanned-document sources: ICDAR2019 SROIE and FUNSD.",
+            "Converter exports train/validation/test labels for PaddleOCR SimpleDataSet.",
+            "Baseline metrics are included only when generated from saved evaluation artifacts.",
+            real_ocr_status_text(ocr_summary),
         ],
         7.8,
         1.75,
         4.6,
         3.7,
-        17,
+        14,
     )
+
+    if ocr_metric_rows:
+        slide = add_blank_slide(prs)
+        add_slide_title(slide, "Measured OCR Baseline", "Traceable to artifacts/ocr/real_ocr_finetune/baseline.")
+        row = ocr_metric_rows[0]
+        add_card(slide, "Samples", row[1], 0.85, 1.65, 2.7, 1.25, "FFFFFF")
+        add_card(slide, "CER", row[2], 3.95, 1.65, 2.7, 1.25, "FFFFFF")
+        add_card(slide, "Word Accuracy", row[3], 7.05, 1.65, 2.7, 1.25, "FFFFFF")
+        add_card(slide, "Exact Match", row[4], 10.15, 1.65, 2.7, 1.25, "FFFFFF")
+        add_bullets(
+            slide,
+            [
+                "Evaluation uses held-out real scanned-document crops prepared from public datasets.",
+                "The same test labels can be reused after fine-tuning for baseline-vs-fine-tuned comparison.",
+                "Borrower-document deployment should add privacy-reviewed labeled financial forms.",
+            ],
+            1.0,
+            3.6,
+            11.2,
+            2.0,
+            17,
+        )
 
     slide = add_blank_slide(prs)
     add_slide_title(slide, "Explainability And Traceability")

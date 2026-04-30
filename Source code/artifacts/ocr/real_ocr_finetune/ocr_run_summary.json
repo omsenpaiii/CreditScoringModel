@@ -1,0 +1,142 @@
+{
+  "status": "prepared_real_dataset",
+  "dataset_info": {
+    "data_dir": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset",
+    "label_files": {
+      "train": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/train_labels.txt",
+      "val": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/val_labels.txt",
+      "test": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/test_labels.txt"
+    },
+    "manifest_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/dataset_manifest.json",
+    "field_labels_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/field_labels.jsonl",
+    "counts": {
+      "train": 1200,
+      "val": 300,
+      "test": 300
+    },
+    "sources": [
+      "sroie",
+      "funsd"
+    ]
+  },
+  "baseline": {
+    "status": "completed",
+    "engine": "PaddleOCR pretrained English OCR",
+    "metrics": {
+      "sample_count": 25,
+      "character_error_rate": 0.11038961038961038,
+      "word_accuracy": 0.6909090909090909,
+      "exact_match_accuracy": 0.44
+    },
+    "prediction_file": "artifacts/ocr/real_ocr_finetune/baseline/paddleocr_predictions.jsonl",
+    "samples": [
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0000_TRIPLE_SIX_POINT_ENTERPRISE_666.png",
+        "relative_path": "images/test/sroie_test_0000_0000_TRIPLE_SIX_POINT_ENTERPRISE_666.png",
+        "ground_truth": "TRIPLE SIX POINT ENTERPRISE 666",
+        "prediction": "Triple Six Point Enterprise 666",
+        "confidence": 0.9957007169723511
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0001_NO_14_16_JALAN_PERMAS_4_3_BANDAR_BARU_PERMAS_JAY.png",
+        "relative_path": "images/test/sroie_test_0000_0001_NO_14_16_JALAN_PERMAS_4_3_BANDAR_BARU_PERMAS_JAY.png",
+        "ground_truth": "NO 14& 16 JALAN PERMAS 4/3 BANDAR BARU PERMAS JAYA",
+        "prediction": "No 14& 16 Jalan Fermas 4/3 Bandar Baru Permas Jay",
+        "confidence": 0.9868082404136658
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0002_TEL_016-7574666.png",
+        "relative_path": "images/test/sroie_test_0000_0002_TEL_016-7574666.png",
+        "ground_truth": "TEL : 016-7574666",
+        "prediction": "Tel:016-7574666",
+        "confidence": 0.9894999265670776
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0003_RECEIPT_NO_REC-0014888.png",
+        "relative_path": "images/test/sroie_test_0000_0003_RECEIPT_NO_REC-0014888.png",
+        "ground_truth": "RECEIPT NO: REC-0014888",
+        "prediction": "Receipt no: REC-0014888",
+        "confidence": 0.983299732208252
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0004_DATE_22-03-2018_04_01_20_PM.png",
+        "relative_path": "images/test/sroie_test_0000_0004_DATE_22-03-2018_04_01_20_PM.png",
+        "ground_truth": "DATE: 22-03-2018 04:01:20 PM",
+        "prediction": "Date: 22-03-2018 04:01:20 PM",
+        "confidence": 0.9847777485847473
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0005_PAYMENT_TYPE_CASH.png",
+        "relative_path": "images/test/sroie_test_0000_0005_PAYMENT_TYPE_CASH.png",
+        "ground_truth": "PAYMENT TYPE: CASH",
+        "prediction": "Payment Type: Cash",
+        "confidence": 0.9973604679107666
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0006_RECEIPT.png",
+        "relative_path": "images/test/sroie_test_0000_0006_RECEIPT.png",
+        "ground_truth": "RECEIPT",
+        "prediction": "Receipt",
+        "confidence": 0.9998822212219238
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0007_RECEIPT_NO._REC-0014888.png",
+        "relative_path": "images/test/sroie_test_0000_0007_RECEIPT_NO._REC-0014888.png",
+        "ground_truth": "(RECEIPT NO.: REC-0014888)",
+        "prediction": "(Receip! No.: REC-0014888)",
+        "confidence": 0.9692891836166382
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0008_QTY_ITEM.png",
+        "relative_path": "images/test/sroie_test_0000_0008_QTY_ITEM.png",
+        "ground_truth": "QTY ITEM",
+        "prediction": "QTY ITEM",
+        "confidence": 0.9998711347579956
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0009_PRICE.png",
+        "relative_path": "images/test/sroie_test_0000_0009_PRICE.png",
+        "ground_truth": "PRICE",
+        "prediction": "n",
+        "confidence": 0.28454312682151794
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0010_TOTAL.png",
+        "relative_path": "images/test/sroie_test_0000_0010_TOTAL.png",
+        "ground_truth": "TOTAL",
+        "prediction": ")",
+        "confidence": 0.8600425124168396
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0011_RM.png",
+        "relative_path": "images/test/sroie_test_0000_0011_RM.png",
+        "ground_truth": "(RM)",
+        "prediction": "SDAA",
+        "confidence": 0.33509501814842224
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0012_RM.png",
+        "relative_path": "images/test/sroie_test_0000_0012_RM.png",
+        "ground_truth": "(RM)",
+        "prediction": "DhA",
+        "confidence": 0.304103285074234
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0013_1X.png",
+        "relative_path": "images/test/sroie_test_0000_0013_1X.png",
+        "ground_truth": "1X",
+        "prediction": "1",
+        "confidence": 0.4382823705673218
+      },
+      {
+        "image_path": "artifacts/ocr/real_ocr_finetune/real_ocr_dataset/images/test/sroie_test_0000_0014_VS_FUJ1500ML.png",
+        "relative_path": "images/test/sroie_test_0000_0014_VS_FUJ1500ML.png",
+        "ground_truth": "VS FUJ1500ML",
+        "prediction": "VS FUJI500ml",
+        "confidence": 0.9313775897026062
+      }
+    ]
+  },
+  "fine_tuning_config": "artifacts/ocr/real_ocr_finetune/real_rec_config.yml",
+  "message": "Real SROIE/FUNSD data prepared and baseline evaluation attempted. Fine-tuning is disabled in this config for CPU-friendly dry runs."
+}

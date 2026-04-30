@@ -27,7 +27,7 @@ def paddle_available() -> bool:
 def prepare_paddleocr_workspace(base_dir: str | Path) -> dict[str, str]:
     base_dir = Path(base_dir)
     repo_dir = base_dir / "third_party" / "PaddleOCR"
-    pretrain_dir = base_dir / "third_party" / "pretrain_models"
+    pretrain_dir = base_dir / ".cache" / "pretrain_models"
     repo_dir.parent.mkdir(parents=True, exist_ok=True)
     pretrain_dir.mkdir(parents=True, exist_ok=True)
 
@@ -36,11 +36,20 @@ def prepare_paddleocr_workspace(base_dir: str | Path) -> dict[str, str]:
 
     tar_path = pretrain_dir / "en_PP-OCRv3_rec_train.tar"
     model_dir = pretrain_dir / "en_PP-OCRv3_rec_train"
-    if not model_dir.exists():
+    model_file = model_dir / "best_accuracy.pdparams"
+    if not model_file.exists() or model_file.stat().st_size == 0:
+        if model_dir.exists():
+            shutil.rmtree(model_dir)
         if not tar_path.exists():
             urlretrieve(PPOCR_PRETRAIN_URL, tar_path)
-        with tarfile.open(tar_path) as archive:
-            archive.extractall(pretrain_dir)
+        try:
+            with tarfile.open(tar_path) as archive:
+                archive.extractall(pretrain_dir)
+        except tarfile.TarError:
+            tar_path.unlink(missing_ok=True)
+            urlretrieve(PPOCR_PRETRAIN_URL, tar_path)
+            with tarfile.open(tar_path) as archive:
+                archive.extractall(pretrain_dir)
 
     return {
         "repo_dir": str(repo_dir),
@@ -140,6 +149,112 @@ Eval:
     shuffle: False
     drop_last: False
     batch_size_per_card: 8
+    num_workers: 0
+"""
+    config_path.write_text(config_text, encoding="utf-8")
+    return config_path
+
+
+def write_real_rec_config(
+    data_dir: str | Path,
+    output_dir: str | Path,
+    pretrained_model_dir: str | Path,
+    epochs: int = 2,
+    batch_size: int = 4,
+) -> Path:
+    """Write a CPU-friendly PaddleOCR recognition fine-tuning config."""
+
+    data_dir = Path(data_dir)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    config_path = output_dir / "real_rec_config.yml"
+    config_text = f"""Global:
+  use_gpu: False
+  epoch_num: {epochs}
+  log_smooth_window: 10
+  print_batch_step: 10
+  save_model_dir: {output_dir.as_posix()}/model
+  save_epoch_step: 1
+  eval_batch_step: [0, 100]
+  cal_metric_during_train: True
+  pretrained_model: {Path(pretrained_model_dir).as_posix()}/best_accuracy
+  character_dict_path: ppocr/utils/en_dict.txt
+  max_text_length: 80
+  infer_mode: False
+  use_space_char: True
+  distributed: False
+Optimizer:
+  name: Adam
+  beta1: 0.9
+  beta2: 0.999
+  lr:
+    learning_rate: 0.00005
+  regularizer:
+    name: L2
+    factor: 0.0
+Architecture:
+  model_type: rec
+  algorithm: CRNN
+  Backbone:
+    name: MobileNetV1Enhance
+    scale: 0.5
+    last_conv_stride: [1, 2]
+    last_pool_type: avg
+  Neck:
+    name: SequenceEncoder
+    encoder_type: rnn
+    hidden_size: 48
+  Head:
+    name: CTCHead
+    fc_decay: 0.00004
+Loss:
+  name: CTCLoss
+PostProcess:
+  name: CTCLabelDecode
+Metric:
+  name: RecMetric
+  main_indicator: acc
+Train:
+  dataset:
+    name: SimpleDataSet
+    data_dir: {data_dir.as_posix()}
+    label_file_list:
+      - {data_dir.joinpath("train_labels.txt").as_posix()}
+    transforms:
+      - DecodeImage:
+          img_mode: BGR
+          channel_first: False
+      - RecConAug: {{}}
+      - RecAug: {{}}
+      - MultiLabelEncode: {{}}
+      - RecResizeImg:
+          image_shape: [3, 48, 320]
+      - KeepKeys:
+          keep_keys: ['image', 'label_ctc', 'length', 'label']
+  loader:
+    shuffle: True
+    batch_size_per_card: {batch_size}
+    drop_last: False
+    num_workers: 0
+Eval:
+  dataset:
+    name: SimpleDataSet
+    data_dir: {data_dir.as_posix()}
+    label_file_list:
+      - {data_dir.joinpath("val_labels.txt").as_posix()}
+    transforms:
+      - DecodeImage:
+          img_mode: BGR
+          channel_first: False
+      - MultiLabelEncode: {{}}
+      - RecResizeImg:
+          image_shape: [3, 48, 320]
+      - KeepKeys:
+          keep_keys: ['image', 'label_ctc', 'length', 'label']
+  loader:
+    shuffle: False
+    drop_last: False
+    batch_size_per_card: {batch_size}
     num_workers: 0
 """
     config_path.write_text(config_text, encoding="utf-8")

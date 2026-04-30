@@ -1,0 +1,24 @@
+{
+  "pipeline": "real_ocr_finetune",
+  "workspace_root": ".",
+  "python_executable": "python3",
+  "output_dir": "artifacts/ocr/real_ocr_finetune_train_cpu",
+  "datasets": ["sroie", "funsd"],
+  "split_limits": {
+    "train": 20,
+    "val": 10,
+    "test": 10
+  },
+  "max_text_regions_per_split": {
+    "train": 250,
+    "val": 100,
+    "test": 100
+  },
+  "seed": 42,
+  "run_baseline": true,
+  "baseline_sample_limit": 20,
+  "run_training": true,
+  "post_training_sample_limit": 20,
+  "epochs": 1,
+  "batch_size": 4
+}

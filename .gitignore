@@ -7,3 +7,12 @@ __pycache__/
 
 # Ignore nested git metadata for vendored repositories, but keep their files
 third_party/**/.git/
+
+# Public OCR datasets are downloaded/recreated by scripts; keep generated summaries only.
+Source code/artifacts/ocr/real_ocr_finetune/real_ocr_dataset/
+Source code/artifacts/ocr/real_ocr_finetune/model/
+Source code/artifacts/ocr/real_ocr_finetune_train_cpu/real_ocr_dataset/
+Source code/artifacts/ocr/real_ocr_finetune_train_cpu/model/
+Source code/artifacts/ocr/real_ocr_finetune_train_cpu/exported_rec_model/
+Source code/.cache/
+Source code/third_party/pretrain_models/
