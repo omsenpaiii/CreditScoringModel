@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import shutil
+import textwrap
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -142,39 +143,39 @@ def copy_if_exists(src: Path, dst: Path) -> Path | None:
 
 
 def make_methodology_flow(output_path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(12.5, 4.5))
+    fig, ax = plt.subplots(figsize=(13.5, 5.2))
     ax.set_axis_off()
     boxes = [
-        ("Data Sources\nGerman Credit + Lending Club", 0.11),
-        ("Preprocessing\nImpute, encode, scale", 0.30),
-        ("Modeling\nLR, RF, GB, MLP", 0.49),
-        ("Evaluation\nROC-AUC, PR-AUC, F1", 0.68),
-        ("Deployment Ready\nArtifacts + GitHub", 0.87),
+        ("Data Sources\nGerman Credit\nLending Club", 0.10),
+        ("Preprocessing\nImpute\nEncode\nScale", 0.30),
+        ("Modeling\nLR | RF | GB | MLP", 0.50),
+        ("Evaluation\nROC-AUC\nPR-AUC\nF1", 0.70),
+        ("Submission\nArtifacts\nGitHub", 0.90),
     ]
     for label, x in boxes:
         ax.add_patch(
             plt.Rectangle(
-                (x - 0.08, 0.46),
-                0.16,
-                0.25,
+                (x - 0.075, 0.50),
+                0.15,
+                0.27,
                 facecolor="#EAF2F8",
                 edgecolor="#1B4F72",
                 linewidth=1.6,
             )
         )
-        ax.text(x, 0.585, label, ha="center", va="center", fontsize=10.5, fontweight="bold")
+        ax.text(x, 0.635, label, ha="center", va="center", fontsize=9.5, fontweight="bold", linespacing=1.25)
     for _, x in boxes[:-1]:
-        ax.annotate("", xy=(x + 0.15, 0.585), xytext=(x + 0.08, 0.585), arrowprops={"arrowstyle": "->", "lw": 1.8})
+        ax.annotate("", xy=(x + 0.155, 0.635), xytext=(x + 0.08, 0.635), arrowprops={"arrowstyle": "->", "lw": 1.8})
     ax.add_patch(
-        plt.Rectangle((0.24, 0.16), 0.52, 0.16, facecolor="#FDF2E9", edgecolor="#AF601A", linewidth=1.4)
+        plt.Rectangle((0.19, 0.17), 0.62, 0.18, facecolor="#FDF2E9", edgecolor="#AF601A", linewidth=1.4)
     )
     ax.text(
         0.50,
-        0.24,
-        "Document OCR extension: PaddleOCR workflow for loan-document intake",
+        0.26,
+        "Real-document OCR extension: SROIE/FUNSD -> PaddleOCR evaluation -> loan-document intake",
         ha="center",
         va="center",
-        fontsize=10.5,
+        fontsize=9.8,
         fontweight="bold",
     )
     fig.tight_layout()
@@ -210,32 +211,34 @@ def make_benchmark_chart(rows: list[dict[str, str]], output_path: Path) -> None:
 
 
 def make_ocr_workflow(output_path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(11, 4.6))
+    fig, ax = plt.subplots(figsize=(13.5, 5.2))
     ax.set_axis_off()
     x_positions = [0.10, 0.30, 0.50, 0.70, 0.90]
     colors = ["#EAF2F8", "#FEF9E7", "#E8F8F5", "#FDEDEC", "#F4ECF7"]
     for idx, ((title, description), x) in enumerate(zip(OCR_WORKFLOW_STEPS, x_positions)):
         ax.add_patch(
             plt.Rectangle(
-                (x - 0.085, 0.45),
-                0.17,
-                0.24,
+                (x - 0.075, 0.46),
+                0.15,
+                0.29,
                 facecolor=colors[idx],
                 edgecolor="#1B4F72",
                 linewidth=1.4,
             )
         )
-        ax.text(x, 0.61, title, ha="center", va="center", fontsize=10, fontweight="bold")
-        ax.text(x, 0.51, description, ha="center", va="center", fontsize=7.4, wrap=True)
+        wrapped_title = "\n".join(textwrap.wrap(title, width=16))
+        wrapped_description = "\n".join(textwrap.wrap(description, width=22))
+        ax.text(x, 0.645, wrapped_title, ha="center", va="center", fontsize=9.2, fontweight="bold", linespacing=1.15)
+        ax.text(x, 0.525, wrapped_description, ha="center", va="center", fontsize=6.8, linespacing=1.15)
     for x in x_positions[:-1]:
-        ax.annotate("", xy=(x + 0.14, 0.57), xytext=(x + 0.085, 0.57), arrowprops={"arrowstyle": "->", "lw": 1.7})
+        ax.annotate("", xy=(x + 0.15, 0.60), xytext=(x + 0.08, 0.60), arrowprops={"arrowstyle": "->", "lw": 1.7})
     ax.text(
         0.5,
         0.22,
-        "Real-data basis: SROIE receipts and FUNSD scanned forms feed measured PaddleOCR evaluation before borrower-document deployment.",
+        "Real-data basis: SROIE receipts and FUNSD forms feed measured PaddleOCR evaluation before borrower-document deployment.",
         ha="center",
         va="center",
-        fontsize=10.5,
+        fontsize=10.2,
         fontweight="bold",
     )
     fig.suptitle("PaddleOCR Workflow Overview", fontweight="bold", fontsize=15)
@@ -555,9 +558,14 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     )
     add_figure(document, figures.get("german_credit_roc_curve.png", Path()), "Figure 3: ROC curve for the best German Credit run.", 5.3)
     add_figure(document, figures.get("lending_club_sample_roc_curve.png", Path()), "Figure 4: ROC curve for the best Lending Club sample run.", 5.3)
-    add_figure(document, figures.get("german_credit_feature_importance.png", Path()), "Figure 5: Top feature-importance output for the best German Credit run.", 5.6)
+    add_figure(document, figures.get("german_credit_pr_curve.png", Path()), "Figure 5: Precision-recall curve for the best German Credit run.", 5.3)
+    add_figure(document, figures.get("lending_club_sample_pr_curve.png", Path()), "Figure 6: Precision-recall curve for the best Lending Club sample run.", 5.3)
+    add_figure(document, figures.get("german_credit_confusion_matrix.png", Path()), "Figure 7: Confusion matrix for the best German Credit run.", 4.8)
+    add_figure(document, figures.get("lending_club_sample_confusion_matrix.png", Path()), "Figure 8: Confusion matrix for the best Lending Club sample run.", 4.8)
+    add_figure(document, figures.get("german_credit_feature_importance.png", Path()), "Figure 9: Top feature-importance output for the best German Credit run.", 5.6)
+    add_figure(document, figures.get("lending_club_sample_feature_importance.png", Path()), "Figure 10: Top feature-importance output for the best Lending Club sample run.", 5.6)
     add_heading(document, "5.1 OCR Module Implementation", level=2)
-    add_figure(document, figures["ocr"], "Figure 6: PaddleOCR workflow overview for borrower-document intake.", 6.2)
+    add_figure(document, figures["ocr"], "Figure 11: PaddleOCR workflow overview for borrower-document intake.", 6.4)
     add_table(
         document,
         ["Workflow Stage", "Implementation Purpose"],
@@ -816,6 +824,19 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_picture_fit(slide, figures.get("lending_club_sample_roc_curve.png", Path()), 7.2, 4.05, 5.1)
 
     slide = add_blank_slide(prs)
+    add_slide_title(slide, "Precision-Recall Curves", "Shows model behavior under class imbalance and risk-recall tradeoffs.")
+    add_picture_fit(slide, figures.get("german_credit_pr_curve.png", Path()), 0.85, 1.35, 5.65)
+    add_picture_fit(slide, figures.get("lending_club_sample_pr_curve.png", Path()), 6.85, 1.35, 5.65)
+    add_textbox(slide, "German Credit", 2.75, 6.25, 2.2, 0.28, 12, True, "566573")
+    add_textbox(slide, "Lending Club Sample", 8.55, 6.25, 2.6, 0.28, 12, True, "566573")
+
+    slide = add_blank_slide(prs)
+    add_slide_title(slide, "Confusion Matrix View", "Held-out decisions shown as approval-risk classification counts.")
+    add_picture_fit(slide, figures.get("german_credit_confusion_matrix.png", Path()), 1.0, 1.35, 5.0)
+    add_picture_fit(slide, figures.get("lending_club_sample_confusion_matrix.png", Path()), 7.15, 1.35, 5.0)
+    add_textbox(slide, "These matrices make the false-positive and false-negative tradeoff visible for viva discussion.", 1.1, 6.35, 11.1, 0.35, 13, False, "566573")
+
+    slide = add_blank_slide(prs)
     add_slide_title(slide, "Real PaddleOCR Data Pipeline", "SROIE receipts + FUNSD forms converted into PaddleOCR recognition labels.")
     add_picture_fit(slide, figures["ocr"], 0.8, 1.45, 6.6)
     add_bullets(
@@ -856,8 +877,9 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
         )
 
     slide = add_blank_slide(prs)
-    add_slide_title(slide, "Explainability And Traceability")
-    add_picture_fit(slide, figures.get("german_credit_feature_importance.png", Path()), 0.8, 1.45, 5.7)
+    add_slide_title(slide, "Explainability And Traceability", "Feature importance is exported for both benchmark datasets.")
+    add_picture_fit(slide, figures.get("german_credit_feature_importance.png", Path()), 0.65, 1.35, 5.9)
+    add_picture_fit(slide, figures.get("lending_club_sample_feature_importance.png", Path()), 6.85, 1.35, 5.9)
     add_bullets(
         slide,
         [
@@ -865,11 +887,11 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             "Metrics are exported as JSON and summarized in CSV.",
             "Final report values can be traced to saved repository artifacts.",
         ],
-        7.05,
-        1.8,
-        5.2,
-        3.4,
-        17,
+        1.0,
+        6.18,
+        11.2,
+        0.85,
+        12,
     )
 
     slide = add_blank_slide(prs)
