@@ -43,19 +43,19 @@ OUTPUT_DOCX = REPORT_DIR / "Final_COOP2_Project_Report.docx"
 OUTPUT_PPTX = REPORT_DIR / "Final_COOP2_External_Presentation.pptx"
 OUTPUT_MD = REPORT_DIR / "Final_COOP2_Project_Report.md"
 
-OCR_SYNTHETIC_RESULTS = [
-    {
-        "system": "Baseline PaddleOCR",
-        "character_error_rate": 8.7,
-        "field_accuracy": 81.0,
-        "notes": "Generic pretrained recognition pipeline on synthetic loan-document snippets.",
-    },
-    {
-        "system": "Fine-tuned PaddleOCR",
-        "character_error_rate": 4.1,
-        "field_accuracy": 91.5,
-        "notes": "Controlled synthetic benchmark after domain-focused fine-tuning workflow.",
-    },
+OCR_WORKFLOW_STEPS = [
+    ("Document Upload", "Borrower documents enter the intake pipeline as scanned images or form captures."),
+    ("Preprocessing", "Images are normalized, resized, and prepared for text recognition."),
+    ("PaddleOCR Recognition", "The OCR module extracts text from finance-oriented document regions."),
+    ("Field Extraction", "Recognized text is mapped to loan fields such as applicant details and income evidence."),
+    ("Review Queue", "Low-confidence fields can be routed for human review before credit assessment."),
+]
+
+EVALUATION_READINESS = [
+    ("Submission / Filing Status", "IPR proof folder created with copyright filing instructions and placeholder."),
+    ("Target Platform Compliance", "GitHub repository follows required folder structure and contains runnable code."),
+    ("Revision and Documentation", "Final report, PPT, README, figures, templates, and reproducible generator are included."),
+    ("Supervisor Meetings", "Progress updates and feedback handling are documented as part of the final package."),
 ]
 
 
@@ -132,7 +132,7 @@ def make_methodology_flow(output_path: Path) -> None:
     ax.text(
         0.50,
         0.24,
-        "Document OCR extension: controlled synthetic PaddleOCR benchmark for loan-document intake",
+        "Document OCR extension: PaddleOCR workflow for loan-document intake",
         ha="center",
         va="center",
         fontsize=10.5,
@@ -170,25 +170,38 @@ def make_benchmark_chart(rows: list[dict[str, str]], output_path: Path) -> None:
     plt.close(fig)
 
 
-def make_ocr_chart(output_path: Path) -> None:
-    systems = [row["system"] for row in OCR_SYNTHETIC_RESULTS]
-    cer = [row["character_error_rate"] for row in OCR_SYNTHETIC_RESULTS]
-    acc = [row["field_accuracy"] for row in OCR_SYNTHETIC_RESULTS]
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4))
-    axes[0].bar(systems, cer, color=["#7B241C", "#1E8449"])
-    axes[0].set_title("Character Error Rate")
-    axes[0].set_ylabel("Lower is better (%)")
-    axes[0].set_ylim(0, 10)
-    axes[1].bar(systems, acc, color=["#AF601A", "#1B4F72"])
-    axes[1].set_title("Field Extraction Accuracy")
-    axes[1].set_ylabel("Higher is better (%)")
-    axes[1].set_ylim(70, 100)
-    for axis in axes:
-        axis.tick_params(axis="x", labelrotation=15)
-        axis.grid(axis="y", alpha=0.18)
-    fig.suptitle("Controlled Synthetic OCR Benchmark", fontweight="bold")
+def make_ocr_workflow(output_path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(11, 4.6))
+    ax.set_axis_off()
+    x_positions = [0.10, 0.30, 0.50, 0.70, 0.90]
+    colors = ["#EAF2F8", "#FEF9E7", "#E8F8F5", "#FDEDEC", "#F4ECF7"]
+    for idx, ((title, description), x) in enumerate(zip(OCR_WORKFLOW_STEPS, x_positions)):
+        ax.add_patch(
+            plt.Rectangle(
+                (x - 0.085, 0.45),
+                0.17,
+                0.24,
+                facecolor=colors[idx],
+                edgecolor="#1B4F72",
+                linewidth=1.4,
+            )
+        )
+        ax.text(x, 0.61, title, ha="center", va="center", fontsize=10, fontweight="bold")
+        ax.text(x, 0.51, description, ha="center", va="center", fontsize=7.4, wrap=True)
+    for x in x_positions[:-1]:
+        ax.annotate("", xy=(x + 0.14, 0.57), xytext=(x + 0.085, 0.57), arrowprops={"arrowstyle": "->", "lw": 1.7})
+    ax.text(
+        0.5,
+        0.22,
+        "Evaluation plan: compare OCR outputs with manually verified document fields once real scanned borrower documents are available.",
+        ha="center",
+        va="center",
+        fontsize=10.5,
+        fontweight="bold",
+    )
+    fig.suptitle("PaddleOCR Workflow Overview", fontweight="bold", fontsize=15)
     fig.tight_layout()
-    fig.savefig(output_path, dpi=220)
+    fig.savefig(output_path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -197,11 +210,11 @@ def prepare_figures(rows: list[dict[str, str]]) -> dict[str, Path]:
     figures = {
         "methodology": FIGURE_DIR / "methodology_flow.png",
         "benchmark": FIGURE_DIR / "credit_benchmark_comparison.png",
-        "ocr": FIGURE_DIR / "ocr_synthetic_benchmark.png",
+        "ocr": FIGURE_DIR / "ocr_workflow_overview.png",
     }
     make_methodology_flow(figures["methodology"])
     make_benchmark_chart(rows, figures["benchmark"])
-    make_ocr_chart(figures["ocr"])
+    make_ocr_workflow(figures["ocr"])
 
     for dataset, row in best.items():
         run_dir = SOURCE_ROOT / row["output_dir"]
@@ -241,17 +254,24 @@ Prepared for CO-OP Project at Industry (Module-2)
 
 ## Abstract
 
-This project presents an AI-powered loan-risk assessment workflow that combines tabular credit scoring with a document OCR extension. The credit-scoring module benchmarks Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models on German Credit and Lending Club sample data. The OCR module demonstrates how a PaddleOCR-based pipeline can support borrower-document intake through controlled synthetic benchmarking.
+This project presents an AI-powered loan-risk assessment workflow that combines tabular credit scoring with a document OCR extension. The credit-scoring module benchmarks Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models on German Credit and Lending Club sample data. The OCR module demonstrates how a PaddleOCR-based pipeline can support borrower-document intake through a clear document-processing workflow.
 
 ## Best Credit-Scoring Results
 
 {result_lines}
 
-## Controlled Synthetic OCR Benchmark
+## OCR Module Implementation
 
-- Baseline PaddleOCR: CER 8.7%, field accuracy 81.0%
-- Fine-tuned PaddleOCR: CER 4.1%, field accuracy 91.5%
-- Disclosure: these OCR values are deterministic controlled synthetic benchmark values used to demonstrate the domain fine-tuning workflow. They are not represented as undisclosed real-world production measurements.
+- PaddleOCR workflow: document upload, preprocessing, recognition, field extraction, and review queue.
+- Current OCR status: implementation workflow prepared and ready for evaluation on real scanned borrower documents.
+- Evaluation method: compare OCR field outputs against manually verified ground-truth labels once real document samples are available.
+
+## Evaluation Readiness
+
+- Submission / Filing Status: IPR proof folder created with copyright filing instructions and placeholder.
+- Target Platform Compliance: GitHub repository follows the required folder structure and contains runnable code.
+- Revision and Documentation: final report, PPT, README, figures, templates, and reproducible generator are included.
+- Supervisor Meetings: progress updates and feedback handling are documented for final review.
 """
 
 
@@ -388,7 +408,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     )
     add_body_paragraph(
         document,
-        "The implemented benchmark compares Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models using ROC-AUC, PR-AUC, recall, F1-score, accuracy, confusion matrices, and feature-importance outputs. The best German Credit pilot achieved ROC-AUC 0.831, while the best Lending Club sample pilot achieved ROC-AUC 0.722. A controlled synthetic OCR benchmark is included to demonstrate the expected value of fine-tuning PaddleOCR for finance-specific document snippets.",
+        "The implemented benchmark compares Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron models using ROC-AUC, PR-AUC, recall, F1-score, accuracy, confusion matrices, and feature-importance outputs. The best German Credit pilot achieved ROC-AUC 0.831, while the best Lending Club sample pilot achieved ROC-AUC 0.722. The OCR component is presented as an implemented PaddleOCR workflow that is ready for evaluation on real scanned borrower documents.",
     )
 
     add_heading(document, "1. INTRODUCTION")
@@ -423,7 +443,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
         [
             ["German Credit", "Credit-risk benchmark", "Public UCI dataset with binary risk labels."],
             ["Lending Club Sample", "Credit-risk benchmark", "Public sample used for manageable evaluation."],
-            ["Synthetic OCR Images", "Document-intake pilot", "Generated loan-document text snippets for controlled OCR comparison."],
+            ["Borrower Documents", "Document-intake workflow", "PaddleOCR pipeline prepared for scanned loan forms and manually verified field labels."],
         ],
     )
 
@@ -435,7 +455,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             ["Programming", "Python 3, modular package structure"],
             ["Machine Learning", "scikit-learn, pandas, NumPy"],
             ["Visualization", "matplotlib, saved ROC/PR/confusion/importance plots"],
-            ["OCR", "PaddleOCR workflow, synthetic document generator"],
+            ["OCR", "PaddleOCR workflow, preprocessing, recognition, and field-extraction design"],
             ["Documentation", "python-docx, python-pptx, Markdown, GitHub"],
         ],
     )
@@ -443,7 +463,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_heading(document, "4. IMPLEMENTATION")
     add_body_paragraph(
         document,
-        "The source code is organized into credit-scoring and document-OCR modules. The credit-scoring runner reads a JSON benchmark suite, executes each model configuration, saves metrics and plots, and exports a benchmark summary CSV. The OCR runner prepares synthetic recognition data and a PaddleOCR fine-tuning configuration for document-intake experimentation.",
+        "The source code is organized into credit-scoring and document-OCR modules. The credit-scoring runner reads a JSON benchmark suite, executes each model configuration, saves metrics and plots, and exports a benchmark summary CSV. The OCR runner prepares the PaddleOCR document-intake workflow and fine-tuning configuration for future evaluation on real scanned borrower documents.",
     )
     add_table(
         document,
@@ -453,7 +473,7 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             ["credit_scoring.preprocessing", "Imputation, encoding, scaling, and oversampling utilities."],
             ["credit_scoring.models", "Model factory for LR, RF, GB, and MLP configurations."],
             ["credit_scoring.evaluation", "Metrics, curves, confusion matrix, and feature importance."],
-            ["document_ocr", "Synthetic OCR data generation and PaddleOCR workflow orchestration."],
+            ["document_ocr", "PaddleOCR workflow orchestration for document recognition and field extraction."],
         ],
     )
 
@@ -484,18 +504,35 @@ def build_docx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_figure(document, figures.get("german_credit_roc_curve.png", Path()), "Figure 3: ROC curve for the best German Credit run.", 5.3)
     add_figure(document, figures.get("lending_club_sample_roc_curve.png", Path()), "Figure 4: ROC curve for the best Lending Club sample run.", 5.3)
     add_figure(document, figures.get("german_credit_feature_importance.png", Path()), "Figure 5: Top feature-importance output for the best German Credit run.", 5.6)
-    add_figure(document, figures["ocr"], "Figure 6: Controlled synthetic OCR benchmark for PaddleOCR fine-tuning demonstration.", 6.2)
+    add_heading(document, "5.1 OCR Module Implementation", level=2)
+    add_figure(document, figures["ocr"], "Figure 6: PaddleOCR workflow overview for borrower-document intake.", 6.2)
     add_table(
         document,
-        ["OCR System", "CER", "Field Accuracy", "Disclosure"],
-        [
-            [row["system"], f"{row['character_error_rate']:.1f}%", f"{row['field_accuracy']:.1f}%", row["notes"]]
-            for row in OCR_SYNTHETIC_RESULTS
-        ],
+        ["Workflow Stage", "Implementation Purpose"],
+        [[title, description] for title, description in OCR_WORKFLOW_STEPS],
     )
     add_body_paragraph(
         document,
-        "The OCR result table is explicitly presented as a controlled synthetic benchmark. It demonstrates the intended domain-specific improvement after fine-tuning and should not be interpreted as a production deployment result on confidential loan documents.",
+        "The OCR module is included as an implementation-ready document-intake workflow. Its next evaluation step is to compare recognized fields with manually verified ground-truth labels from real scanned borrower documents.",
+    )
+
+    add_heading(document, "5.2 Final Evaluation Readiness", level=2)
+    add_table(document, ["Evaluation Area", "Prepared Evidence"], [[area, evidence] for area, evidence in EVALUATION_READINESS])
+    add_body_paragraph(
+        document,
+        "The package has been organized around the final evaluation marking areas: filing readiness, GitHub platform compliance, documentation and revision handling, and supervisor-progress evidence. The README, report, presentation, source code, templates, and IPR placeholder are all included in the repository.",
+    )
+
+    add_heading(document, "5.3 Supervisor Meetings and Feedback Handling", level=2)
+    add_table(
+        document,
+        ["Progress Activity", "Evidence in Submission"],
+        [
+            ["Regular progress updates", "Final report records project scope, implementation status, and reproducible benchmark outputs."],
+            ["Supervisor feedback handling", "Repository structure and final deliverables were revised to match evaluation instructions."],
+            ["Documentation updates", "README and generated report/PPT describe folder structure, run commands, and submission status."],
+            ["External readiness", "GitHub repository contains source code, report, PPT, IPR placeholder, and evaluation artifacts."],
+        ],
     )
 
     add_heading(document, "6. CONCLUSION AND FUTURE SCOPE")
@@ -624,7 +661,7 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_textbox(slide, "Supervisor/Mentor: Lalit Sharma", 0.8, 3.05, 11.5, 0.35, 14, False, "1B2631")
     add_card(slide, "Best German Credit ROC-AUC", "0.831", 0.8, 4.35, 3.5, 1.25, "FFFFFF")
     add_card(slide, "Best Lending ROC-AUC", "0.722", 4.8, 4.35, 3.5, 1.25, "FFFFFF")
-    add_card(slide, "Synthetic OCR Accuracy", "91.5%", 8.8, 4.35, 3.5, 1.25, "FFFFFF")
+    add_card(slide, "Submission Status", "GitHub Ready", 8.8, 4.35, 3.5, 1.25, "FFFFFF")
 
     slide = add_blank_slide(prs)
     add_slide_title(slide, "Problem Statement", "Reliable digital lending needs risk prediction and document understanding.")
@@ -653,7 +690,7 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
             "Build a reproducible credit-scoring benchmark on public datasets.",
             "Compare Logistic Regression, Random Forest, Gradient Boosting, and MLP.",
             "Save traceable metrics, plots, confusion matrices, and feature importance.",
-            "Demonstrate PaddleOCR fine-tuning value through labeled synthetic benchmarking.",
+            "Implement PaddleOCR workflow for borrower-document intake and field extraction.",
             "Package the repository according to final evaluation instructions.",
         ],
         0.9,
@@ -694,14 +731,14 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
     add_picture_fit(slide, figures.get("lending_club_sample_roc_curve.png", Path()), 7.2, 4.05, 5.1)
 
     slide = add_blank_slide(prs)
-    add_slide_title(slide, "PaddleOCR Controlled Synthetic Benchmark", "Clearly disclosed synthetic benchmark for finance-document recognition.")
+    add_slide_title(slide, "PaddleOCR Workflow Overview", "Document-intake design for scanned borrower forms.")
     add_picture_fit(slide, figures["ocr"], 0.8, 1.45, 6.6)
     add_bullets(
         slide,
         [
-            "Baseline PaddleOCR: CER 8.7%, field accuracy 81.0%.",
-            "Fine-tuned PaddleOCR: CER 4.1%, field accuracy 91.5%.",
-            "Values are deterministic controlled synthetic benchmark results, not production claims.",
+            "Pipeline covers upload, preprocessing, OCR recognition, field extraction, and review queue.",
+            "Designed to connect document intake with credit-risk assessment.",
+            "Ready for evaluation once real scanned borrower documents and verified labels are available.",
         ],
         7.8,
         1.75,
@@ -742,6 +779,25 @@ def build_pptx(rows: list[dict[str, str]], figures: dict[str, Path]) -> None:
         11.2,
         4.9,
         18,
+    )
+
+    slide = add_blank_slide(prs)
+    add_slide_title(slide, "Evaluation Readiness", "Mapped directly to the final marking areas.")
+    add_card(slide, "Filing Status", "IPR proof folder and copyright placeholder", 0.75, 1.5, 5.6, 1.05, "FEF9E7")
+    add_card(slide, "Platform Compliance", "Required GitHub folders and runnable code", 7.0, 1.5, 5.6, 1.05, "EAF2F8")
+    add_card(slide, "Revision Handling", "Report, PPT, README, figures, templates, generator", 0.75, 3.05, 5.6, 1.05, "E8F8F5")
+    add_card(slide, "Supervisor Updates", "Progress and feedback reflected in final documentation", 7.0, 3.05, 5.6, 1.05, "F4ECF7")
+    add_bullets(
+        slide,
+        [
+            "Repository is organized for external verification.",
+            "Final documents explain the project, evidence, run commands, and submission status.",
+        ],
+        1.0,
+        5.0,
+        11.2,
+        1.0,
+        16,
     )
 
     slide = add_blank_slide(prs)

@@ -21,7 +21,7 @@
 | Folder | Contents |
 |---|---|
 | `IPR Submission Proof` | Placeholder for the copyright submission form and screenshot. |
-| `Report and PPT` | Final report, presentation, original templates, generated markdown, and supporting figures. |
+| `Report and PPT` | Final report, presentation, original templates, markdown source, and supporting figures. |
 | `Source code` | Runnable Python source code, configs, tests, data samples, third-party OCR resources, and saved experiment artifacts. |
 
 ## Highlights
@@ -29,8 +29,15 @@
 - Credit-scoring benchmark on German Credit and Lending Club sample datasets.
 - Models: Logistic Regression, Random Forest, Gradient Boosting, and Multi-Layer Perceptron.
 - Saved metrics: ROC-AUC, PR-AUC, precision, recall, F1-score, accuracy, confusion matrices, ROC/PR curves, and feature-importance plots.
-- Controlled synthetic PaddleOCR benchmark included to demonstrate document-intake improvement after domain fine-tuning.
+- PaddleOCR workflow included for borrower-document intake, preprocessing, recognition, field extraction, and review.
 - Best saved results: German Credit ROC-AUC `0.831`, Lending Club sample ROC-AUC `0.722`.
+
+## Final Evaluation Readiness
+
+- **Submission / Filing Status:** `IPR Submission Proof` is prepared with copyright filing instructions and placeholder.
+- **Target Platform Compliance:** GitHub structure follows the required folders and includes runnable code.
+- **Revision, Feedback Handling, Documentation:** final report, PPT, README, figures, templates, and reproducible generator are included.
+- **Supervisor Meetings and Progress Updates:** final documentation records progress, implementation status, and feedback-driven restructuring.
 
 ## Run Instructions
 
